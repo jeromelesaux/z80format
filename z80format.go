@@ -7,31 +7,73 @@ import (
 	"strings"
 )
 
-var instructions = []string{
-	"ADC",
-	"ADD",
-	"AND",
-	"BIT",
-	"CALL",
-	"CCF",
-	"CP",
-	"CPD",
-	"CPDR",
-	"CPI",
-	"CPIR",
-	"CPL",
-	"DAA",
-	"DEC",
-	"DI",
-	"DJNZ",
-	"EI",
-	"EX",
-	"EXX",
-	"HALT",
-	"IM",
-	"IN",
-	"INC",
-	"IND",
+type instruction struct {
+	op         string
+	twoOp bool
+	arg1       opInterface
+	arg2       opInterface
+}
+
+type opInterface interface {
+	Offset() bool
+	Op() []string
+}
+
+type op struct {
+	offset bool
+	op     []string
+}
+
+func (o op) Offset() bool {
+	return o.offset
+}
+func (o op) Op() []string {
+	return o.op
+}
+
+var (
+	noOp                = op{}
+	op8Instructions     = []string{"A", "H", "L", "D", "E", "B", "C", "I", "R", "IXH", "IYH", "IXL", "IYL", "(HL)", "(DE)", "(A)", "(H)", "(L)", "(D)", "(E)", "(B)", "(C)"}
+	op8FullInstructions = []string{"A", "H", "L", "D", "E", "B", "C", "I", "R", "IXH", "IYH", "IXL", "IYL", "(HL)", "(DE)", "(A)", "(H)", "(L)", "(D)", "(E)", "(B)", "(C)", "(IX+n)", "(IY+n)", "(nn)"}
+	op16Instructions    = []string{"HL", "BC", "DE", "(SP)", "AF", "AF'", "HL'", "BC'", "DE'", "IX", "IY", "IX'", "IY'"}
+	instructions        = map[string]instruction{
+		instruction{op:"ADC", twoOp: true, }
+	}
+)
+
+/*
+
+var op8 = []string{"A", "H", "L", "D", "E", "B", "C", "I", "R", "IXH", "IYH", "IXL", "IYL", "(HL)", "(DE)", "(A)", "(H)", "(L)", "(D)", "(E)", "(B)", "(C)"}
+var op8Iter = []string{"(IX+n)", "(IY+n)", "(nn)"}
+var op16 = []string{"HL", "BC", "DE", "(SP)", "AF", "AF'", "HL'", "BC'", "DE'", "IX", "IY", "IX'", "IY'"}
+var op16Full = [][]string{op16}
+var op8Full = [][]string{op8, op8Add}
+
+var instructions = map[string][][]string{
+	"ADC":  noOp,
+	"ADD":  noOp,
+	"AND":  noOp,
+	"BIT":  noOp,
+	"CALL": noOp,
+	"CCF":  noOp,
+	"CP":   noOp,
+	"CPD":  noOp,
+	"CPDR": [][]string{},
+	"CPI":  [][]string{},
+	"CPIR": [][]string{},
+	"CPL":  [][]string{},
+	"DAA":  [][]string{},
+	"DEC":  [][]string{},
+	"DI":   [][]string{},
+	"DJNZ": [][]string{},
+	"EI":   [][]string{},
+	"EX":   [][]string{},
+	"EXX":  noOp,
+	"HALT": noOp,
+	"IM":   noOp,
+	"IN":   noOp,
+	"INC":  noOp,
+	"IND":  noOp,
 	"INDR",
 	"INI",
 	"INIR",
@@ -77,6 +119,7 @@ var instructions = []string{
 	"SUB",
 	"XOR",
 }
+*/
 
 func Format(in string) (string, error) {
 	out := new(bytes.Buffer)
