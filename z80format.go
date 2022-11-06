@@ -26,6 +26,10 @@ func (o *operand) hasTwoArguments() bool {
 	return !reflect.DeepEqual(o.OperandLeft, noOp)
 }
 
+func (o *operand) isCondition() bool {
+	return reflect.DeepEqual(o.OperandLeft, conditions)
+}
+
 var (
 	noOp                = []string{}
 	op8Instructions     = []string{"A", "H", "L", "D", "E", "B", "C", "I", "R", "IXH", "IYH", "IXL", "IYL", "(HL)", "(DE)", "(A)", "(H)", "(L)", "(D)", "(E)", "(B)", "(C)"}
@@ -281,7 +285,7 @@ func Format(in string) (string, error) {
 	for scanner.Scan() {
 		t := scanner.Text()
 		insts := strings.Split(t, ":")
-		for _, v0 := range insts {
+		for indice, v0 := range insts {
 			cleaned := strings.Trim(v0, " \t")
 			instr := strings.FieldsFunc(cleaned, split)
 			if len(instr) == 0 {
@@ -295,19 +299,23 @@ func Format(in string) (string, error) {
 							if !op.hasTwoArguments() {
 								out.WriteString(fmt.Sprintf("\t%s %s", v1, instr[1]))
 							} else {
-								mOp := strings.Split(instr[1], ",")
-								if len(mOp) == 2 {
-									opLeft := mOp[0]
-									opRight := mOp[1]
-									ok, val0 := contains(opLeft, op.OperandLeft)
-									if !ok {
-										continue
+								if op.isCondition() {
+									out.WriteString(fmt.Sprintf("\t%s", v1))
+								} else {
+									mOp := strings.Split(instr[1], ",")
+									if len(mOp) == 2 {
+										opLeft := mOp[0]
+										opRight := mOp[1]
+										ok, val0 := contains(opLeft, op.OperandLeft)
+										if !ok {
+											continue
+										}
+										ok, val1 := contains(opRight, op.OperandRight)
+										if !ok {
+											continue
+										}
+										out.WriteString(fmt.Sprintf("\t%s %s,%s %s", v1, val0, val1, strings.Join(instr[2:], " ")))
 									}
-									ok, val1 := contains(opRight, op.OperandRight)
-									if !ok {
-										continue
-									}
-									out.WriteString(fmt.Sprintf("\t%s %s,%s %s", v1, val0, val1, strings.Join(instr[2:], " ")))
 								}
 							}
 							// verifier les syntaxes a la suite de l'iteration
@@ -321,7 +329,7 @@ func Format(in string) (string, error) {
 					out.WriteString(strings.Join(instr, " "))
 				}
 			}
-			if len(insts) > 1 {
+			if len(insts) > 1 && indice < (len(insts)-1) {
 				out.WriteString(":")
 			}
 		}
