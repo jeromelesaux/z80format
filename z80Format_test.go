@@ -68,7 +68,7 @@ func TestSampleSpaceTestRoutine(t *testing.T) {
 			  bit 7,a
 			  jp nz,LoopScroll
 	`
-	expected := "\n;\n; Joue Musique\n;\nTestSpace\n; call #0244 ; play music\n\tLD B,#F5 \nWaitVBL\n\tIN A,(C) \n\tRRA\n\tJR NC,WaitVBL\n\n;\nspace LD BC,#F40E\n\tOUT (C),C \n\tLD BC,#F6C0 \n\tOUT (C),C \nDW #71ED ; out (c),0\n\tLD BC,#F792 \n\tOUT (C),C \n\tLD BC,#F645 \n\tOUT (C),C \n\tLD B,#F4 \n\tIN A,(C) \n\tLD BC,#F782 \n\tOUT (C),C \n\tBIT 7,a\n\tJP NZ,LoopScroll\n\n"
+	expected := "\n;\n; Joue Musique\n;\nTestSpace\n; call #0244 ; play music\n\tLD B,#F5\nWaitVBL\n\tIN A,(C)\n\tRRA\n\tJR NC,WaitVBL\n\n;\nspace\tLD BC,#F40E\n\tOUT (C),C\n\tLD BC,#F6C0\n\tOUT (C),C\nDW #71ED ; out (c),0\n\tLD BC,#F792\n\tOUT (C),C\n\tLD BC,#F645\n\tOUT (C),C\n\tLD B,#F4\n\tIN A,(C)\n\tLD BC,#F782\n\tOUT (C),C\n\tBIT 7,a\n\tJP NZ,LoopScroll\n\n"
 	res, err := z80format.Format(bytes.NewBufferString(code))
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)

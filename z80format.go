@@ -290,8 +290,29 @@ func Format(r io.Reader) (string, error) {
 			if len(instr) == 0 {
 				out.WriteString(cleaned)
 			} else {
+				var label string
+				var v2, v3 string
 				v1 := strings.ToUpper(instr[0])
+				if len(instr) > 1 {
+					v2 = instr[1]
+				}
+				if len(instr) > 2 {
+					v3 = strings.Join(instr[2:], " ")
+				}
 				i, ok := instructions[v1]
+				if !ok && v1 != ";" {
+					// check if the line starts by a label
+					if len(instr) > 2 {
+						v10 := strings.ToUpper(instr[1])
+						i0, ok0 := instructions[v10]
+						if ok0 {
+							label, i, ok, v1, v2 = instr[0], i0, ok0, v10, instr[2]
+						}
+						if len(instr) > 2 {
+							v3 = strings.Join(instr[3:], " ")
+						}
+					}
+				}
 				if ok {
 					if i.hasOperands() {
 						for _, op := range i.operands {
@@ -317,7 +338,7 @@ func Format(r io.Reader) (string, error) {
 									}
 									break
 								} else {
-									mOp := strings.Split(instr[1], ",")
+									mOp := strings.Split(v2, ",")
 									if len(mOp) == 2 {
 										opLeft := mOp[0]
 										opRight := mOp[1]
@@ -329,7 +350,15 @@ func Format(r io.Reader) (string, error) {
 										if !ok {
 											continue
 										}
-										out.WriteString(fmt.Sprintf("\t%s %s,%s %s", v1, val0, val1, strings.Join(instr[2:], " ")))
+										if label != "" {
+											out.WriteString(fmt.Sprintf("%s\t%s %s,%s", label, v1, val0, val1))
+										} else {
+											out.WriteString(fmt.Sprintf("\t%s %s,%s", v1, val0, val1))
+										}
+										if v3 != "" {
+											out.WriteString(v3)
+										}
+										break
 									}
 								}
 							}
