@@ -8,3 +8,6 @@ build:
 
 clean:
 	${RM} -f z80formatter
+
+test:
+	${CC} test ./... -cover
