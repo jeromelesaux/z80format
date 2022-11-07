@@ -298,8 +298,9 @@ func Format(r io.Reader) (string, error) {
 							if !op.hasTwoArguments() {
 								out.WriteString(fmt.Sprintf("\t%s %s", v1, instr[1]))
 							} else {
-								if op.isCondition() {
-									out.WriteString(fmt.Sprintf("\t%s", v1))
+								ok, condition := contains(instr[1], op.OperandLeft)
+								if op.isCondition() && ok {
+									out.WriteString(fmt.Sprintf("\t%s %s", v1, condition))
 								} else {
 									mOp := strings.Split(instr[1], ",")
 									if len(mOp) == 2 {
