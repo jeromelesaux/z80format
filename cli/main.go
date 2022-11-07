@@ -11,6 +11,7 @@ import (
 var (
 	format = flag.String("format", "", "assembly file to format")
 	help   = flag.Bool("help", false, "display help message")
+	rasm   = flag.Bool("rasm", true, "enable rasm syntaxe substitution")
 )
 
 func main() {
@@ -33,6 +34,9 @@ func main() {
 	}
 
 	result, _ := z80format.Format(in)
+	if *rasm {
+		result = z80format.RasmSyntaxe(result)
+	}
 	fmt.Printf("%s", result)
 	os.Exit(0)
 }
