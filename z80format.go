@@ -298,9 +298,24 @@ func Format(r io.Reader) (string, error) {
 							if !op.hasTwoArguments() {
 								out.WriteString(fmt.Sprintf("\t%s %s", v1, instr[1]))
 							} else {
-								ok, condition := contains(instr[1], op.OperandLeft)
+								var conditionValue string
+								var conditionLabel string
+								if len(instr) > 1 {
+									r := strings.Split(instr[1], ",")
+									if len(r) >= 1 {
+										conditionValue = r[0]
+									}
+									if len(r) > 1 {
+										conditionLabel = r[1]
+									}
+								}
+								ok, condition := contains(conditionValue, op.OperandLeft)
 								if op.isCondition() && ok {
 									out.WriteString(fmt.Sprintf("\t%s %s", v1, condition))
+									if conditionLabel != "" {
+										out.WriteString("," + conditionLabel)
+									}
+									break
 								} else {
 									mOp := strings.Split(instr[1], ",")
 									if len(mOp) == 2 {

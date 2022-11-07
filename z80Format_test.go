@@ -37,3 +37,39 @@ func TestFormat(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
+
+func TestSampleSpaceTestRoutine(t *testing.T) {
+	code := `
+	;
+	; Joue Musique
+	;
+	TestSpace
+			 ; call #0244 ; play music
+			 LD	B,#F5
+	WaitVBL
+		IN	A,(C)
+		RRA
+		JR	NC,WaitVBL			; Attendre VBL
+		  call #0244 ; play music
+	;
+	space     ld bc,#F40E
+			  out (c),c
+			  ld bc,#F6C0
+			  out (c),c
+		  DW #71ED        ; out (c),0
+			  ld bc,#F792
+			  out (c),c
+			  ld bc,#F645
+			  out (c),c
+			  ld b,#F4
+			  in a,(c)
+			  ld bc,#F782
+			  out (c),c
+			  bit 7,a
+			  jp nz,LoopScroll
+	`
+	expected := "\n;\n; Joue Musique\n;\nTestSpace\n; call #0244 ; play music\n\tLD B,#F5 \nWaitVBL\n\tIN A,(C) \n\tRRA\n\tJR NC,WaitVBL\n\n;\nspace LD BC,#F40E\n\tOUT (C),C \n\tLD BC,#F6C0 \n\tOUT (C),C \nDW #71ED ; out (c),0\n\tLD BC,#F792 \n\tOUT (C),C \n\tLD BC,#F645 \n\tOUT (C),C \n\tLD B,#F4 \n\tIN A,(C) \n\tLD BC,#F782 \n\tOUT (C),C \n\tBIT 7,a\n\tJP NZ,LoopScroll\n\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
