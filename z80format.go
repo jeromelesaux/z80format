@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 )
@@ -276,10 +277,8 @@ var (
 	}
 )
 
-func Format(in string) (string, error) {
+func Format(r io.Reader) (string, error) {
 	out := new(bytes.Buffer)
-	buf := bytes.NewBufferString(in)
-	r := bufio.NewReader(buf)
 	scanner := bufio.NewScanner(r)
 	line := 1
 	for scanner.Scan() {

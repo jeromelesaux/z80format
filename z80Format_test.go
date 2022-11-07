@@ -1,6 +1,7 @@
 package z80format_test
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/jeromelesaux/z80format"
@@ -32,7 +33,7 @@ func TestFormat(t *testing.T) {
 			 jp asicoff
 `
 	expected := "FontOk\n;brk\n\tLD DE,my_font ; SpriteHardPtr\n\tLD L,a \n\tLD H,0 \n\tADD HL,HL ;*2\n\tADD HL,HL ;*4\n\tADD HL,HL ;*8\n\tADD HL,HL ;*16\n\tADD HL,HL ;*32\n\tADD HL,HL ;*64\n\tADD HL,HL ;*128\n\tADD HL,HL ;*256 octets taille d'une sprite hard\n\tADD HL,DE ; hl pointe sur la bonne lettre dans la fonte\n\n\tLD A,I ; numero du sprite\n\n\tLD D,A ; adresse du sprite\n\tLD E,0 \n\tLD BC,#00FF+1 \n\tLDIR\n\tJP asicoff\n"
-	res, err := z80format.Format(code)
+	res, err := z80format.Format(bytes.NewBufferString(code))
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }

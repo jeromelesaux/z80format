@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/jeromelesaux/z80format"
@@ -33,12 +32,7 @@ func main() {
 		defer in.Close()
 	}
 
-	content, err := ioutil.ReadAll(in)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while reading content file (%s) error [%s]\n", *format, err.Error())
-		os.Exit(-1)
-	}
-	result, _ := z80format.Format(string(content))
+	result, _ := z80format.Format(in)
 	fmt.Printf("%s", result)
 	os.Exit(0)
 }
