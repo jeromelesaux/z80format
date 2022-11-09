@@ -97,3 +97,11 @@ func TestSampleSpaceTestRoutine(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
+
+func TestIsHexadecimal(t *testing.T) {
+	res := z80format.IsHexadecimal("#BC77")
+	assert.Equal(t, true, res)
+
+	res = z80format.IsHexadecimal("&77")
+	assert.Equal(t, true, res)
+}

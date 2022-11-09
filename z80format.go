@@ -31,6 +31,51 @@ func (o *operand) isCondition() bool {
 	return reflect.DeepEqual(o.OperandLeft, conditions)
 }
 
+func IsCondition(value string) bool {
+	ok, _ := contains(value, conditions)
+	return ok
+}
+
+func IsRegister8Bits(value string) bool {
+	ok, _ := contains(value, op8FullInstructions)
+	return ok
+}
+
+func IsRegister16Bits(value string) bool {
+	ok, _ := contains(value, op16Instructions)
+	return ok
+}
+
+func IsLabel(value string) bool {
+	if IsCondition(value) {
+		return false
+	}
+	if IsRegister16Bits(value) {
+		return false
+	}
+	if IsRegister8Bits(value) {
+		return false
+	}
+	if IsHexadecimal(value) {
+		return false
+	}
+
+	return true
+}
+
+func IsHexadecimal(value string) bool {
+	var i int
+	res, err := fmt.Sscanf(value, "&%x", &i)
+	if err == nil && res == 1 {
+		return true
+	}
+	res, err = fmt.Sscanf(value, "#%x", &i)
+	if err == nil && res == 1 {
+		return true
+	}
+	return false
+}
+
 var (
 	noOp                = []string{}
 	op8Instructions     = []string{"A", "H", "L", "D", "E", "B", "C", "I", "R", "IXH", "IYH", "IXL", "IYL", "(HL)", "(DE)", "(A)", "(H)", "(L)", "(D)", "(E)", "(B)", "(C)"}
