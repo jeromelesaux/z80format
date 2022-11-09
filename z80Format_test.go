@@ -2,6 +2,7 @@ package z80format_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/jeromelesaux/z80format"
@@ -38,6 +39,22 @@ func TestFormat(t *testing.T) {
 	assert.Equal(t, expected, res)
 }
 
+func TestIncB(t *testing.T) {
+	code := `inc b`
+	expected := "\t" + strings.ToUpper(code) + "\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
+
+
+func TestCallWithLabel(t *testing.T) {
+	code := `call #BC07`
+	expected := "\t" + strings.ToUpper(code) + "\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
 func TestSampleSpaceTestRoutine(t *testing.T) {
 	code := `
 	;

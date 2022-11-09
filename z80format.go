@@ -24,7 +24,7 @@ type operand struct {
 }
 
 func (o *operand) hasTwoArguments() bool {
-	return !reflect.DeepEqual(o.OperandLeft, noOp)
+	return !reflect.DeepEqual(o.OperandRight, noOp)
 }
 
 func (o *operand) isCondition() bool {
@@ -318,7 +318,12 @@ func Format(r io.Reader) (string, error) {
 					if i.hasOperands() {
 						for _, op := range i.operands {
 							if !op.hasTwoArguments() {
-								out.WriteString(fmt.Sprintf("\t%s %s", v1, instr[1]))
+								_, v20 := contains(v2, op.OperandLeft)
+								if v20 != "" {
+									out.WriteString(fmt.Sprintf("\t%s %s", v1, v20))
+								} else {
+									out.WriteString(fmt.Sprintf("\t%s %s", v1, v2))
+								}
 								break
 							} else {
 								var conditionValue string
