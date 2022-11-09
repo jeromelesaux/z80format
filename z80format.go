@@ -64,6 +64,7 @@ var (
 			op: "CALL",
 			operands: []operand{
 				{OperandLeft: conditions, OperandRight: noOp},
+				{OperandLeft: noOp, OperandRight: noOp},
 			}},
 		"CCF": {
 			op:       "CCF",
@@ -318,6 +319,7 @@ func Format(r io.Reader) (string, error) {
 						for _, op := range i.operands {
 							if !op.hasTwoArguments() {
 								out.WriteString(fmt.Sprintf("\t%s %s", v1, instr[1]))
+								break
 							} else {
 								var conditionValue string
 								var conditionLabel string
