@@ -33,7 +33,7 @@ func TestFormat(t *testing.T) {
 		ldir  
 			 jp asicoff
 `
-	expected := "FontOk\n;brk\n\tLD DE,my_font; SpriteHardPtr\n\tLD L,a\n\tLD H,0\n\tADD HL,HL;*2\n\tADD HL,HL;*4\n\tADD HL,HL;*8\n\tADD HL,HL;*16\n\tADD HL,HL;*32\n\tADD HL,HL;*64\n\tADD HL,HL;*128\n\tADD HL,HL;*256 octets taille d'une sprite hard\n\tADD HL,DE; hl pointe sur la bonne lettre dans la fonte\n\n\tLD A,I; numero du sprite\n\n\tLD D,A; adresse du sprite\n\tLD E,0\n\tLD BC,#00FF+1\n\tLDIR\n\tJP asicoff\n"
+	expected := "FontOk\n;brk\n\tLD de,my_font; SpriteHardPtr\n\tLD l,a\n\tLD h,0\n\tADD HL,HL;*2\n\tADD HL,HL;*4\n\tADD HL,HL;*8\n\tADD HL,HL;*16\n\tADD HL,HL;*32\n\tADD HL,HL;*64\n\tADD HL,HL;*128\n\tADD HL,HL;*256 octets taille d'une sprite hard\n\tADD HL,DE; hl pointe sur la bonne lettre dans la fonte\n\n\tLD A,I; numero du sprite\n\n\tLD D,A; adresse du sprite\n\tLD E,0\n\tLD bc,#00FF+1\n\tLDIR\n\tJP asicoff\n"
 	res, err := z80format.Format(bytes.NewBufferString(code))
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
@@ -47,10 +47,17 @@ func TestIncB(t *testing.T) {
 	assert.Equal(t, expected, res)
 }
 
-
 func TestCallWithLabel(t *testing.T) {
 	code := `call #BC07`
 	expected := "\t" + strings.ToUpper(code) + "\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
+
+func TestLdWithLabel(t *testing.T) {
+	code := `space     ld bc,#F40E`
+	expected := "space\tLD bc,#F40E\n"
 	res, err := z80format.Format(bytes.NewBufferString(code))
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
@@ -85,7 +92,7 @@ func TestSampleSpaceTestRoutine(t *testing.T) {
 			  bit 7,a
 			  jp nz,LoopScroll
 	`
-	expected := "\n;\n; Joue Musique\n;\nTestSpace\n; call #0244 ; play music\n\tLD B,#F5\nWaitVBL\n\tIN A,(C)\n\tRRA\n\tJR NC,WaitVBL\n\tCALL #0244\n;\nspace\tLD BC,#F40E\n\tOUT (C),C\n\tLD BC,#F6C0\n\tOUT (C),C\nDW #71ED ; out (c),0\n\tLD BC,#F792\n\tOUT (C),C\n\tLD BC,#F645\n\tOUT (C),C\n\tLD B,#F4\n\tIN A,(C)\n\tLD BC,#F782\n\tOUT (C),C\n\tBIT 7,a\n\tJP NZ,LoopScroll\n\n"
+	expected := "\n;\n; Joue Musique\n;\nTestSpace\n; call #0244 ; play music\n\tLD B,#F5\nWaitVBL\n\tIN A,(C)\n\tRRA\n\tJR NC,WaitVBL; Attendre VBL\n\tCALL #0244; play music\n;\nspace\tLD bc,#F40E\n\tOUT (C),C\n\tLD bc,#F6C0\n\tOUT (C),C\nDW #71ED ; out (c),0\n\tLD bc,#F792\n\tOUT (C),C\n\tLD bc,#F645\n\tOUT (C),C\n\tLD b,#F4\n\tIN A,(C)\n\tLD bc,#F782\n\tOUT (C),C\n\tBIT 7,A\n\tJP nz,LoopScroll\n\n"
 	res, err := z80format.Format(bytes.NewBufferString(code))
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)

@@ -319,10 +319,16 @@ func Format(r io.Reader) (string, error) {
 						for _, op := range i.operands {
 							if !op.hasTwoArguments() {
 								_, v20 := contains(v2, op.OperandLeft)
+								if label != "" {
+									out.WriteString(label)
+								}
 								if v20 != "" {
 									out.WriteString(fmt.Sprintf("\t%s %s", v1, v20))
 								} else {
 									out.WriteString(fmt.Sprintf("\t%s %s", v1, v2))
+								}
+								if v3 != "" {
+									out.WriteString(v3)
 								}
 								break
 							} else {
