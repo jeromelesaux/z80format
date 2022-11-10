@@ -32,21 +32,25 @@ func (o *operand) isCondition() bool {
 }
 
 func IsCondition(value string) bool {
-	ok, _ := contains(value, conditions)
+	ok, _ := contains(strings.ToUpper(value), conditions)
 	return ok
 }
 
 func IsRegister8Bits(value string) bool {
-	ok, _ := contains(value, op8FullInstructions)
+	ok, _ := contains(strings.ToUpper(value), op8FullInstructions)
 	return ok
 }
 
 func IsRegister16Bits(value string) bool {
-	ok, _ := contains(value, op16Instructions)
+	ok, _ := contains(strings.ToUpper(value), op16Instructions)
 	return ok
 }
 
 func IsLabel(value string) bool {
+	_, ok := instructions[value]
+	if ok {
+		return false
+	}
 	if IsCondition(value) {
 		return false
 	}
@@ -65,11 +69,11 @@ func IsLabel(value string) bool {
 
 func IsHexadecimal(value string) bool {
 	var i int
-	res, err := fmt.Sscanf(value, "&%x", &i)
+	res, err := fmt.Sscanf(strings.ToUpper(value), "&%X", &i)
 	if err == nil && res == 1 {
 		return true
 	}
-	res, err = fmt.Sscanf(value, "#%x", &i)
+	res, err = fmt.Sscanf(strings.ToUpper(value), "#%X", &i)
 	if err == nil && res == 1 {
 		return true
 	}
@@ -336,95 +340,119 @@ func Format(r io.Reader) (string, error) {
 			if len(instr) == 0 {
 				out.WriteString(cleaned)
 			} else {
-				var label string
-				var v2, v3 string
-				v1 := strings.ToUpper(instr[0])
+				var label, comment, instruction, arg1, arg2 string
+				instruction = strings.ToUpper(instr[0])
 				if len(instr) > 1 {
-					v2 = instr[1]
+					arg1 = instr[1]
 				}
 				if len(instr) > 2 {
-					v3 = strings.Join(instr[2:], " ")
+					arg2 = instr[2]
 				}
-				i, ok := instructions[v1]
-				if !ok && v1 != ";" {
-					// check if the line starts by a label
-					if len(instr) > 2 {
-						v10 := strings.ToUpper(instr[1])
-						i0, ok0 := instructions[v10]
-						if ok0 {
-							label, i, ok, v1, v2 = instr[0], i0, ok0, v10, instr[2]
-						}
-						if len(instr) > 2 {
-							v3 = strings.Join(instr[3:], " ")
-						}
+				if len(instr) > 3 {
+					comment = strings.Join(instr[3:], " ")
+				}
+				if IsLabel(instruction) {
+					label = instr[0]
+					instruction = strings.ToUpper(arg1)
+					arg1 = arg2
+					if len(instr) > 3 {
+						arg2 = instr[3]
 					}
+					if len(instr) > 4 {
+						comment = strings.Join(instr[4:], " ")
+					} else {
+						comment = ""
+					}
+
 				}
+
+				i, ok := instructions[instruction]
 				if ok {
 					if i.hasOperands() {
 						for _, op := range i.operands {
 							if !op.hasTwoArguments() {
-								_, v20 := contains(v2, op.OperandLeft)
-								if label != "" {
-									out.WriteString(label)
+								if (IsLabel(arg1) && reflect.DeepEqual(op.OperandRight, noOp)) ||
+									(IsHexadecimal(arg1) && reflect.DeepEqual(op.OperandRight, noOp)) ||
+									(IsCondition(arg1) && reflect.DeepEqual(op.OperandLeft, conditions)) ||
+									(IsRegister8Bits(arg1) && reflect.DeepEqual(op.OperandLeft, op8Instructions)) ||
+									(IsRegister16Bits(arg1) && reflect.DeepEqual(op.OperandLeft, op16Instructions)) {
+									if label != "" {
+										out.WriteString(label)
+									}
+									out.WriteString(fmt.Sprintf("\t%s ", instruction))
+									if IsHexadecimal(arg1) || IsLabel(arg1) {
+										out.WriteString(arg1)
+									} else {
+										out.WriteString(strings.ToUpper(arg1))
+									}
+									if arg2 != "" {
+										if IsHexadecimal(arg2) || IsLabel(arg2) {
+											out.WriteString(fmt.Sprintf(",%s", arg2))
+										} else {
+											out.WriteString(fmt.Sprintf(",%s", strings.ToUpper(arg2)))
+										}
+									}
+									if comment != "" {
+										out.WriteString(comment)
+									}
+									break
 								}
-								if v20 != "" {
-									out.WriteString(fmt.Sprintf("\t%s %s", v1, v20))
-								} else {
-									out.WriteString(fmt.Sprintf("\t%s %s", v1, v2))
-								}
-								if v3 != "" {
-									out.WriteString(v3)
-								}
-								break
+
 							} else {
 								var conditionValue string
-								var conditionLabel string
-								if len(instr) > 1 {
-									r := strings.Split(instr[1], ",")
-									if len(r) >= 1 {
-										conditionValue = r[0]
-									}
-									if len(r) > 1 {
-										conditionLabel = r[1]
-									}
+								if IsCondition(arg1) {
+									conditionValue = arg1
 								}
 								ok, condition := contains(conditionValue, op.OperandLeft)
 								if op.isCondition() && ok {
-									out.WriteString(fmt.Sprintf("\t%s %s", v1, condition))
-									if conditionLabel != "" {
-										out.WriteString("," + conditionLabel)
+									out.WriteString(fmt.Sprintf("\t%s %s", instruction, condition))
+									if label != "" {
+										out.WriteString(label)
+									}
+									out.WriteString(fmt.Sprintf("\t%s", instruction))
+									out.WriteString(condition)
+									if arg2 != "" {
+										out.WriteString(fmt.Sprintf(",%s", arg2))
+									}
+									if comment != "" {
+										out.WriteString(comment)
 									}
 									break
 								} else {
-									mOp := strings.Split(v2, ",")
-									if len(mOp) == 2 {
-										opLeft := mOp[0]
-										opRight := mOp[1]
-										ok, val0 := contains(opLeft, op.OperandLeft)
-										if !ok {
-											continue
-										}
-										ok, val1 := contains(opRight, op.OperandRight)
-										if !ok {
-											continue
-										}
-										if label != "" {
-											out.WriteString(fmt.Sprintf("%s\t%s %s,%s", label, v1, val0, val1))
-										} else {
-											out.WriteString(fmt.Sprintf("\t%s %s,%s", v1, val0, val1))
-										}
-										if v3 != "" {
-											out.WriteString(v3)
-										}
-										break
+
+									ok, val0 := contains(arg1, op.OperandLeft)
+									if !ok {
+										continue
 									}
+									ok, val1 := contains(arg2, op.OperandRight)
+									if !ok {
+										continue
+									}
+									if label != "" {
+										out.WriteString(label)
+									}
+									out.WriteString(fmt.Sprintf("\t%s", instruction))
+									if val0 != "" {
+										out.WriteString(fmt.Sprintf(" %s", val0))
+									}
+									if val1 != "" {
+										out.WriteString(fmt.Sprintf(",%s", val1))
+									}
+									if comment != "" {
+										out.WriteString(comment)
+									}
+									break
+
 								}
 							}
 							// verifier les syntaxes a la suite de l'iteration
 						}
 					} else {
 						// verifier la syntaxe
-						out.WriteString(fmt.Sprintf("\t%s", v1))
+						out.WriteString(fmt.Sprintf("\t%s", instruction))
+						if arg1 != "" {
+							out.WriteString(" " + arg1)
+						}
 					}
 				} else {
 					// label
@@ -442,7 +470,7 @@ func Format(r io.Reader) (string, error) {
 }
 
 func split(r rune) bool {
-	if r == '\t' || r == ' ' {
+	if r == '\t' || r == ' ' || r == ',' {
 		return true
 	}
 	return false
