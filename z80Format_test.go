@@ -107,3 +107,11 @@ func TestData(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
+
+func TestRasmSaveKeyword(t *testing.T) {
+	code := `save'disc.bin',#200, end - start,DSK,'martine-animate.dsk'`
+	expected := "save'disc.bin',#200, end - start,DSK,'martine-animate.dsk'\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}

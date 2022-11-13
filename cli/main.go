@@ -9,15 +9,17 @@ import (
 )
 
 var (
-	format = flag.String("format", "", "assembly file to format")
-	help   = flag.Bool("help", false, "display help message")
-	rasm   = flag.Bool("rasm", true, "enable rasm syntaxe substitution")
+	format  = flag.String("format", "", "assembly file to format")
+	help    = flag.Bool("help", false, "display help message")
+	rasm    = flag.Bool("rasm", true, "enable rasm syntaxe substitution")
+	version = "0.1"
 )
 
 func main() {
 	flag.Parse()
 	var in *os.File
 	if *help {
+		fmt.Println("Version: " + version)
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
