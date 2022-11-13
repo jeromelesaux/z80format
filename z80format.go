@@ -456,7 +456,7 @@ func Format(r io.Reader) (string, error) {
 					}
 				} else {
 					// label
-					out.WriteString(strings.Join(instr, " "))
+					out.WriteString(t)
 				}
 			}
 			if len(insts) > 1 && indice < (len(insts)-1) {

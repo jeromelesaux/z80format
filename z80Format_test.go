@@ -99,3 +99,11 @@ func TestIsHexadecimal(t *testing.T) {
 	res = z80format.IsHexadecimal("&77")
 	assert.Equal(t, true, res)
 }
+
+func TestData(t *testing.T) {
+	code := `def 1,2,3,4,5`
+	expected := "def 1,2,3,4,5\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
