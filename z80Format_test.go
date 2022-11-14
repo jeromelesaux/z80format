@@ -115,3 +115,22 @@ func TestRasmSaveKeyword(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expected, res)
 }
+
+func TestRegisterA(t *testing.T) {
+	code := `LD	B,C`
+	expected := "\tLD B,C\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+	code = `LD	A,I`
+	expected = "\tLD A,I\n"
+	res, err = z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+	code = `	LD	C,A`
+	expected = "\tLD C,A\n"
+	res, err = z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+
+}

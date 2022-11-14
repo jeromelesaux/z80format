@@ -375,6 +375,7 @@ func Format(r io.Reader) (string, error) {
 									(IsHexadecimal(arg1) && reflect.DeepEqual(op.OperandRight, noOp)) ||
 									(IsCondition(arg1) && reflect.DeepEqual(op.OperandLeft, conditions)) ||
 									(IsRegister8Bits(arg1) && reflect.DeepEqual(op.OperandLeft, op8Instructions)) ||
+									(IsRegister8Bits(arg1) && reflect.DeepEqual(op.OperandLeft, op8FullInstructions)) ||
 									(IsRegister16Bits(arg1) && reflect.DeepEqual(op.OperandLeft, op16Instructions)) {
 									if label != "" {
 										out.WriteString(label)
