@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/md5"
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
+	"strings"
 
 	"github.com/jeromelesaux/z80format"
 )
@@ -11,8 +14,8 @@ import (
 var (
 	format  = flag.String("format", "", "assembly file to format")
 	help    = flag.Bool("help", false, "display help message")
-	rasm    = flag.Bool("rasm", true, "enable rasm syntaxe substitution")
-	version = "0.1"
+	rasm    = flag.Bool("rasm", false, "enable rasm syntaxe substitution")
+	version = "0.2"
 )
 
 func main() {
@@ -36,9 +39,25 @@ func main() {
 	}
 
 	result, _ := z80format.Format(in)
+	// in.Seek(0, io.SeekStart)
+	// s, _ := ioutil.ReadAll(in)
+	// if compare(string(s), result) {
+	// 	fmt.Fprintf(os.Stderr, "this convertion may not result a good convertion.\n")
+	// }
 	if *rasm {
 		result = z80format.RasmSyntaxe(result)
 	}
 	fmt.Printf("%s", result)
+
 	os.Exit(0)
+}
+
+func compare(s0, s1 string) bool {
+	replacer := strings.NewReplacer(" ", "", "\t", "", "\r", "", "\n", "")
+	s0Replaced := strings.ToUpper(replacer.Replace(s0))
+	s1Replaced := strings.ToUpper(replacer.Replace(s1))
+	md0 := md5.Sum([]byte(s0Replaced))
+	md1 := md5.Sum([]byte(s1Replaced))
+	fmt.Fprintf(os.Stderr, "%x %x\n", md0, md1)
+	return reflect.DeepEqual(md0, md1)
 }
