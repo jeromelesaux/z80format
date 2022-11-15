@@ -11,6 +11,11 @@ You need a Golang environnement set up and compile it via the makefile command :
 make 
 ```
 
+Golang specific : 
+```bash 
+go install github.com/jeromelesaux/z80format/cli/z80formatter@latest
+```
+
 ## Usage 
 
 You can use it like this 
