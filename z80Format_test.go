@@ -116,6 +116,14 @@ func TestRasmSaveKeyword(t *testing.T) {
 	assert.Equal(t, expected, res)
 }
 
+func TestOutiWithLabel(t *testing.T) {
+	code := `label outi`
+	expected := "label\tOUTI\n"
+	res, err := z80format.Format(bytes.NewBufferString(code))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, res)
+}
+
 func TestRegisterA(t *testing.T) {
 	code := `LD	B,C`
 	expected := "\tLD B,C\n"

@@ -450,6 +450,9 @@ func Format(r io.Reader) (string, error) {
 						}
 					} else {
 						// verifier la syntaxe
+						if label != "" {
+							out.WriteString(label)
+						}
 						out.WriteString(fmt.Sprintf("\t%s", instruction))
 						if arg1 != "" {
 							out.WriteString(" " + arg1)
